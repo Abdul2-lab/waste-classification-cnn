@@ -1,0 +1,25 @@
+# Virtual environment
+venv/
+env/
+*.venv
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Uploaded images (runtime, not needed in repo)
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Large regenerable data folders (keep only raw dataset if you want)
+data/augmented/
+data/split/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

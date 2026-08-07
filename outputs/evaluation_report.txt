@@ -1,0 +1,21 @@
+WASTE CLASSIFICATION CNN — EVALUATION REPORT
+==================================================
+
+Test Accuracy: 0.9656
+Test Loss    : 0.1055
+
+Confusion Matrix:
+[[284   6  10]
+ [  3 294   3]
+ [  4   5 291]]
+
+Classification Report:
+              precision    recall  f1-score   support
+
+   cardboard       0.98      0.95      0.96       300
+       glass       0.96      0.98      0.97       300
+       paper       0.96      0.97      0.96       300
+
+    accuracy                           0.97       900
+   macro avg       0.97      0.97      0.97       900
+weighted avg       0.97      0.97      0.97       900
