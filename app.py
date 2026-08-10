@@ -9,24 +9,32 @@ Features (assignment requirements):
 - Prediction confidence dikhao
 - Recyclable / Non-recyclable batao
 
+NOTE: Ye version TensorFlow Lite (ai-edge-litert) use karta hai, poori
+TensorFlow library nahi — kyunki Render free tier pe sirf 512MB RAM hai,
+aur poori TensorFlow load hone mein 300-400MB kha jati hai jisse
+"Out of Memory" crash hota tha. TFLite sirf ~40MB use karta hai.
+
 Run: python3 app.py
 Phir browser mein: http://localhost:5000
 """
 
 import os
-import sys
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from flask import Flask, request, render_template, jsonify
 from werkzeug.utils import secure_filename
 import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing.image import load_img, img_to_array
+from PIL import Image
+
+try:
+    # Production/lightweight import path
+    from ai_edge_litert.interpreter import Interpreter
+except ImportError:
+    # Fallback agar sirf full tensorflow installed ho (jaise local dev mein)
+    from tensorflow.lite.python.interpreter import Interpreter
 
 BASE_DIR = Path(__file__).parent
-MODEL_PATH = BASE_DIR / "model" / "waste_classifier_best.keras"
+MODEL_PATH = BASE_DIR / "model" / "waste_classifier.tflite"
 UPLOAD_DIR = BASE_DIR / "static" / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -38,18 +46,26 @@ app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = str(UPLOAD_DIR)
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10MB max
 
-print("Loading model...")
-model = load_model(MODEL_PATH)
+print("Loading TFLite model...")
+interpreter = Interpreter(model_path=str(MODEL_PATH))
+interpreter.allocate_tensors()
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 print("Model loaded successfully!")
 
 
 def predict_image(image_path):
-    img = load_img(image_path, target_size=IMG_SIZE)
-    arr = img_to_array(img) / 255.0
+    # Image load + preprocess (resize, normalize) — bilkul training jaisa
+    img = Image.open(image_path).convert("RGB").resize(IMG_SIZE)
+    arr = np.array(img, dtype=np.float32) / 255.0
     arr = np.expand_dims(arr, axis=0)
 
-    predictions = model.predict(arr, verbose=0)[0]
-    pred_idx = np.argmax(predictions)
+    # TFLite interpreter ko input dena aur run karna
+    interpreter.set_tensor(input_details[0]["index"], arr)
+    interpreter.invoke()
+    predictions = interpreter.get_tensor(output_details[0]["index"])[0]
+
+    pred_idx = int(np.argmax(predictions))
     pred_class = CLASSES[pred_idx]
     confidence = float(predictions[pred_idx])
 
