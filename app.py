@@ -1,22 +1,4 @@
-"""
-app.py
--------
-Flask Web App — Smart Waste Classification System
 
-Features (assignment requirements):
-- Image upload karo
-- Waste type predict karo
-- Prediction confidence dikhao
-- Recyclable / Non-recyclable batao
-
-NOTE: Ye version TensorFlow Lite (ai-edge-litert) use karta hai, poori
-TensorFlow library nahi — kyunki Render free tier pe sirf 512MB RAM hai,
-aur poori TensorFlow load hone mein 300-400MB kha jati hai jisse
-"Out of Memory" crash hota tha. TFLite sirf ~40MB use karta hai.
-
-Run: python3 app.py
-Phir browser mein: http://localhost:5000
-"""
 
 import os
 from pathlib import Path
